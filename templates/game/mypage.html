@@ -1,0 +1,98 @@
+{% extends 'game/base.html' %}
+{% load number_filters %}
+
+{% block title %}마이페이지 - 유니콘 메이커{% endblock %}
+
+{% block content %}
+<div class="mypage">
+    
+    <!-- 프로필 섹션 -->
+    <section class="profile-section">
+        <div class="profile-image">
+            {% if user.img_profile %}
+                <img src="{{ user.img_profile.url }}" alt="프로필 이미지">
+            {% else %}
+                <div class="default-avatar">👤</div>
+            {% endif %}
+        </div>
+        
+        <div class="profile-info">
+            <h1>{{ user.nickname }}</h1>
+            <p class="username">@{{ user.username }}</p>
+        </div>
+    </section>
+
+    <!-- 통계 섹션 -->
+    <section class="stats-section">
+        <div class="stat-item">
+            <span class="stat-value">{{ user.best_profit_rate|floatformat:1 }}%</span>
+            <span class="stat-label">최고 수익률</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value">{{ user.total_games }}</span>
+            <span class="stat-label">총 플레이</span>
+        </div>
+    </section>
+
+    <!-- 최근 게임 기록 -->
+    <section class="recent-games">
+        <h2>📋 최근 게임 기록</h2>
+        
+        {% if recent_games %}
+        <table class="games-table">
+            <thead>
+                <tr>
+                    <th>날짜</th>
+                    <th>수익률</th>
+                    <th>최종 자본</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in recent_games %}
+                <tr>
+                    <td>{{ game.created_at|date:"m/d H:i" }}</td>
+                    <td class="{% if game.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">
+                        {{ game.final_profit_rate|floatformat:1 }}%
+                    </td>
+                    <td>{{ game.current_capital|korean_currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-message">아직 게임 기록이 없습니다.</p>
+        {% endif %}
+    </section>
+
+    <!-- 비밀번호 변경 섹션 (동주 담당) -->
+    <section class="password-section glass-card">
+        <h2>🔐 비밀번호 변경</h2>
+        
+        <form method="POST" action="{% url 'game:change_password' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>현재 비밀번호</label>
+                <input type="password" name="old_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label>새 비밀번호</label>
+                <input type="password" name="new_password1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>새 비밀번호 확인</label>
+                <input type="password" name="new_password2" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+        </form>
+    </section>
+
+    <div class="btn-group">
+        <a href="{% url 'game:game_start' %}" class="btn btn-primary">🚀 게임 시작</a>
+        <a href="{% url 'game:main' %}" class="btn btn-secondary">🏠 메인으로</a>
+    </div>
+</div>
+{% endblock %}

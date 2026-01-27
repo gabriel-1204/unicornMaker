@@ -1,0 +1,77 @@
+{% extends 'game/base.html' %}
+{% load number_filters %}
+
+{% block title %}랭킹 - 유니콘 메이커{% endblock %}
+
+{% block content %}
+<div class="ranking-page">
+    
+    <!-- 오늘의 랭킹 -->
+    <section class="today-ranking">
+        <h1>🏆 오늘의 랭킹</h1>
+        
+        {% if today_ranking %}
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>닉네임</th>
+                    <th>수익률</th>
+                    <th>최종 자본</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in today_ranking %}
+                <tr class="{% if forloop.counter <= 3 %}top-rank{% endif %}">
+                    <td class="rank">{{ forloop.counter }}</td>
+                    <td class="nickname">{{ session.user.nickname }}</td>
+                    <td class="profit {% if session.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">
+                        {{ session.final_profit_rate|floatformat:1 }}%
+                    </td>
+                    <td class="capital">{{ session.current_capital|korean_currency }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-message">아직 오늘의 기록이 없습니다.</p>
+        {% endif %}
+    </section>
+
+    <!-- 명예의 전당 -->
+    <section class="hall-of-fame">
+        <h2>👑 명예의 전당 (역대 Top 10)</h2>
+        
+        {% if hall_of_fame %}
+        <table class="ranking-table hall-of-fame-table">
+            <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>닉네임</th>
+                    <th>수익률</th>
+                    <th>최종 자본</th>
+                    <th>날짜</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in hall_of_fame %}
+                <tr>
+                    <td class="rank">{{ forloop.counter }}</td>
+                    <td class="nickname">{{ session.user.nickname }}</td>
+                    <td class="profit positive">{{ session.final_profit_rate|floatformat:1 }}%</td>
+                    <td class="capital">{{ session.current_capital|korean_currency }}</td>
+                    <td class="date">{{ session.created_at|date:"m/d" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty-message">아직 기록이 없습니다.</p>
+        {% endif %}
+    </section>
+
+    <div class="btn-group">
+        <a href="{% url 'game:main' %}" class="btn btn-primary">🏠 메인으로</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'game/base.html' %}
+{% load number_filters %}
+
+{% block title %}유니콘 메이커 - 대박 아니면 쪽박!{% endblock %}
+
+{% block content %}
+<div class="main-page">
+    <!-- 히어로 섹션 -->
+    <section class="hero">
+        <h1>🦄 유니콘 메이커</h1>
+        <p class="slogan">대박 아니면 쪽박! 당신의 선택은?</p>
+        
+        {% if user.is_authenticated %}
+            {% if active_session %}
+                <!-- 진행 중인 게임 있음 -->
+                <a href="{% url 'game:play' session_id=active_session.pk %}" class="btn btn-primary">
+                    🎮 게임 계속하기
+                </a>
+                <p class="session-info">
+                    남은 자본: {{ active_session.current_capital|korean_currency }} | 
+                    남은 기회: {{ active_session.remaining_chances }}회
+                </p>
+            {% else %}
+                <!-- 새 게임 시작 -->
+                <a href="{% url 'game:game_start' %}" class="btn btn-primary">
+                    🚀 게임 시작
+                </a>
+            {% endif %}
+        {% else %}
+            <!-- 비로그인 -->
+            <a href="{% url 'game:login' %}" class="btn btn-primary">로그인하고 시작</a>
+            <a href="{% url 'game:signup' %}" class="btn btn-secondary">회원가입</a>
+        {% endif %}
+    </section>
+
+    <!-- 오늘의 Top 3 -->
+    <section class="top3-section">
+        <h2>🏆 오늘의 Top 3</h2>
+        {% if top3 %}
+            <div class="top3-list">
+                {% for session in top3 %}
+                <div class="top3-item rank-{{ forloop.counter }}">
+                    <span class="rank">{{ forloop.counter }}</span>
+                    <span class="nickname">{{ session.user.nickname }}</span>
+                    <span class="profit">{{ session.final_profit_rate|floatformat:1 }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>아직 오늘의 기록이 없습니다. 첫 번째 투자를 시작하세요!</p>
+        {% endif %}
+        <a href="{% url 'game:ranking' %}" class="btn btn-link">전체 랭킹 보기 →</a>
+    </section>
+
+    <!-- 게임 설명 -->
+    <section class="how-to-play">
+        <h2>🎯 게임 방법</h2>
+        <ol>
+            <li>자본금 1억으로 시작</li>
+            <li>5인의 창업가가 제안하는 아이디어에 투자</li>
+            <li>5인의 창업가마다 다른 등장확률/성공률/수익률</li>
+            <li>성공하면 최대 2000% 수익! 실패하면 전액 손실...!</li>
+            <li>5번의 기회로 최고 수익률 달성!</li>
+        </ol>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}유니콘 메이커{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'game:main' %}" class="nav-logo">🦄 유니콘 메이커</a>
+            
+            <ul class="nav-menu">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'game:ranking' %}">🏆 랭킹</a></li>
+                    <li><a href="{% url 'game:mypage' %}">👤 {{ user.nickname }}</a></li>
+                    <li><a href="{% url 'game:logout' %}">로그아웃</a></li>
+                {% else %}
+                    <li><a href="{% url 'game:login' %}">로그인</a></li>
+                    <li><a href="{% url 'game:signup' %}">회원가입</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <p>© 2026 알파메일 - 유니콘 메이커</p>
+    </footer>
+</body>
+</html>

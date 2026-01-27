@@ -1,0 +1,38 @@
+{% extends 'game/base.html' %}
+
+{% block title %}로그인 - 유니콘 메이커{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-box">
+        <h1>🦄 로그인</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <span class="error">{{ field.errors.0 }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            {% if form.non_field_errors %}
+            <div class="error-box">
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-primary">로그인</button>
+        </form>
+        
+        <p class="auth-switch">
+            계정이 없으신가요? 
+            <a href="{% url 'game:signup' %}">회원가입</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
