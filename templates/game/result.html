@@ -51,16 +51,14 @@
 
     <!-- 현재 게임 상태 -->
     <div class="result-status">
-        <div class="game-status2">
-            <div class="status-item">
-                <span class="label">💰 현재 자본금</span>
-                <span class="value">{{ session.current_capital|korean_currency }}</span>
-            </div>
-            <div class="status-item">
-                <span class="label">🎯 남은 기회</span>
-                <span class="value">{{ session.remaining_chances }}회</span>
-            </div>
+        <div class="result-item">
+            <span class="label">💰 현재 자본금</span>
+            <span class="value">{{ session.current_capital|korean_currency }}</span>
         </div>
+        <div class="result-item">
+            <span class="label">🎯 남은 기회</span>
+            <span class="value">{{ session.remaining_chances }}회</span>
+        </div>        
     </div>
 
     <!-- 다음 버튼 -->

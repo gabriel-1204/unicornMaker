@@ -43,6 +43,10 @@
                 <span class="label">🎯남은 기회</span>
                 <span class="value">{{ session.remaining_chances }}회</span>
             </div>
+            <div class="status-item">
+                <span class="label">🌞성공 확률</span>
+                <span class="value"> ??? %</span>
+            </div>
         </div>
         <form method="POST" action="{% url 'game:invest' session_id=session.pk %}" onsubmit="showLoading()">
             {% csrf_token %}
@@ -61,6 +65,7 @@
             </div>            
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">💸투자하기</button>
+                <button type="submit" class="btn btn-up">⬆️확률강화</button>
                 <button type="button" class="btn btn-danger" onclick="setAllIn()">🔥올인</button>
                 <a href="{% url 'game:pass' session_id=session.pk %}" class="btn btn-secondary" onclick="showLoading2()">⏭️패스</a>
             </div>

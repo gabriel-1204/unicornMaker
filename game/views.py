@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 
 from .models import User, GameSession, Investment
 from .forms import SignupForm, LoginForm
-# gemini_service에서 함수들 임포트
 from .gemini_service import generate_idea, generate_result, get_random_character
 
 
@@ -21,7 +20,7 @@ def signup_view(request):
         form = SignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # 회원가입 후 자동 로그인
+            login(request, user)
             return redirect('game:main')
     else:
         form = SignupForm()
@@ -54,7 +53,6 @@ def mypage_view(request):
     """마이페이지"""
     user = request.user
     
-    # 최근 게임 기록 조회 (완료된 게임만)
     recent_games = GameSession.objects.filter(
         user=user,
         is_finished=True
@@ -79,7 +77,6 @@ def main_view(request):
         'top3': top3,
     }
     
-    # 로그인한 유저의 진행 중인 게임 확인
     if request.user.is_authenticated:
         active_session = GameSession.objects.filter(
             user=request.user,
@@ -93,7 +90,6 @@ def main_view(request):
 @login_required
 def game_start_view(request):
     """게임 시작 - 새 세션 생성"""
-    # 기존 진행 중인 게임이 있으면 그 게임으로 이동
     active_session = GameSession.objects.filter(
         user=request.user,
         is_finished=False
@@ -102,7 +98,6 @@ def game_start_view(request):
     if active_session:
         return redirect('game:play', session_id=active_session.pk)
 
-    # 새 게임 세션 생성 (초기자본 1억 = 10000만원, 기회 5회)
     session = GameSession.objects.create(
         user=request.user,
         current_capital=10000,
@@ -114,7 +109,7 @@ def game_start_view(request):
 
 @login_required
 def play_view(request, session_id):
-    """투자 화면 - 캐릭터가 아이디어 제시"""
+    """투자 화면"""
     session = get_object_or_404(GameSession, pk=session_id, user=request.user)
     
     # 게임 종료 체크
@@ -126,22 +121,21 @@ def play_view(request, session_id):
         session.is_finished = True
         session.final_profit_rate = session.calculate_profit_rate()
         session.save()
-        
-        # 유저 통계 업데이트 (최고 수익률 갱신 등)
         update_user_stats(request.user, session.final_profit_rate)
-        
-
         return redirect('game:ranking')
     
-    # 1. 랜덤 캐릭터 선택 (get_random_character가 가중치 적용)
-    character = get_random_character()
+    # ========== 새로고침 방지 ==========
+    # 세션에 저장된 캐릭터/아이디어가 있으면 재사용
+    character = request.session.get('current_character')
+    idea = request.session.get('current_idea')
     
-    # 2. AI 아이디어 생성
-    idea = generate_idea(character)
-    
-    # 3. 세션에 현재 캐릭터와 아이디어 임시 저장 (invest 단계에서 사용)
-    request.session['current_character'] = character
-    request.session['current_idea'] = idea
+    # 없을 때만 새로 생성
+    if not character or not idea:
+        character = get_random_character()
+        idea = generate_idea(character)
+        request.session['current_character'] = character
+        request.session['current_idea'] = idea
+    # ==================================
     
     context = {
         'session': session,
@@ -164,42 +158,29 @@ def invest_view(request, session_id):
         
         # 투자금 검증 로직
         if invest_amount < 2000 and invest_amount != session.current_capital:
-            # 최소 투자금 미달 (올인 제외)
             return redirect('game:play', session_id=session_id)
         
         if invest_amount > session.current_capital:
-            # 보유금 초과
             return redirect('game:play', session_id=session_id)
         
         # 세션에서 저장된 캐릭터/아이디어 불러오기
         character = request.session.get('current_character', {})
         idea = request.session.get('current_idea', {})
         
-        # 캐릭터 정보가 없으면 다시 플레이 화면으로
         if not character:
             return redirect('game:play', session_id=session_id)
         
-        # ========================================================
-        # [수정] 캐릭터별 확률 및 수익률 로직 적용
-        # ========================================================
-        
-        # 1. 성공 확률 가져오기 (기본값 0.5)
+        # 캐릭터별 확률 및 수익률 로직
         success_prob = character.get('success_rate', 0.5)
-        
-        # 2. 성공 여부 판정 (True/False)
         is_success = random.random() < success_prob
         
         if is_success:
-            # 성공 시: 캐릭터별 min_roi ~ max_roi 사이의 랜덤 수익률 (무조건 이득)
             min_roi = character.get('min_roi', 10)
             max_roi = character.get('max_roi', 50)
-            
-            # 랜덤 범위 수익률 적용
             profit_rate = random.randint(min_roi, max_roi)
             profit = int(invest_amount * (profit_rate / 100))
             session.current_capital += profit
         else:
-            # 실패 시: 전액 손실
             profit_rate = -100
             session.current_capital -= invest_amount
         
@@ -213,8 +194,7 @@ def invest_view(request, session_id):
             idea_title=idea.get('title', '제목 없음'),
             idea_description=idea.get('description', ''),
             invest_amount=invest_amount,
-            # [수정된 부분] success_prob(실수)가 아니라 is_success(불리언)를 저장해야 함
-            is_success=is_success,  
+            is_success=is_success,
             profit_rate=profit_rate,
             result_system_msg=result.get('system_msg', ''),
             result_character_reaction=result.get('reaction', '')
@@ -229,11 +209,13 @@ def invest_view(request, session_id):
             session.final_profit_rate = session.calculate_profit_rate()
             session.save()
             update_user_stats(request.user, session.final_profit_rate)
-            
         else:
             session.save()
         
-        # 결과 화면으로 이동
+        # 세션 데이터 삭제 (다음 턴에 새 캐릭터 나오게)
+        request.session.pop('current_character', None)
+        request.session.pop('current_idea', None)
+
         return redirect('game:result', investment_id=investment.pk)
     
     return redirect('game:play', session_id=session_id)
@@ -242,7 +224,9 @@ def invest_view(request, session_id):
 @login_required
 def pass_view(request, session_id):
     """패스 - 기회 차감 없이 다음 캐릭터"""
-    # 단순 리다이렉트만 하면 play_view에서 새로운 캐릭터를 뽑음
+    # 세션 데이터 삭제 (새 캐릭터 나오게)
+    request.session.pop('current_character', None)
+    request.session.pop('current_idea', None)
     return redirect('game:play', session_id=session_id)
 
 
@@ -252,7 +236,6 @@ def result_view(request, investment_id):
     investment = get_object_or_404(Investment, pk=investment_id)
     session = investment.session
     
-    # 본인 게임인지 확인
     if session.user != request.user:
         return redirect('game:main')
     
@@ -322,5 +305,5 @@ def update_user_stats(user, profit_rate):
     """유저 통계 업데이트 (게임 종료 시 호출)"""
     user.total_games += 1
     if profit_rate > user.best_profit_rate:
-       user.best_profit_rate = profit_rate
+        user.best_profit_rate = profit_rate
     user.save()
