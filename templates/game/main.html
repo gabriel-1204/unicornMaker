@@ -5,6 +5,13 @@
 
 {% block content %}
 <div class="main-page">
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">잠시만 기다려주세요...</p>
+        </div>
+    </div>
     <!-- 히어로 섹션 -->
     <section class="hero">
         <h1>🦄 유니콘 메이커</h1>
@@ -13,7 +20,7 @@
         {% if user.is_authenticated %}
             {% if active_session %}
                 <!-- 진행 중인 게임 있음 -->
-                <a href="{% url 'game:play' session_id=active_session.pk %}" class="btn btn-primary">
+                <a href="{% url 'game:play' session_id=active_session.pk %}" class="btn btn-primary" onclick="showLoading()">
                     🎮 게임 계속하기
                 </a>
                 <p class="session-info">
@@ -22,7 +29,7 @@
                 </p>
             {% else %}
                 <!-- 새 게임 시작 -->
-                <a href="{% url 'game:game_start' %}" class="btn btn-primary">
+                <a href="{% url 'game:game_start' %}" class="btn btn-primary" onclick="showLoading()">
                     🚀 게임 시작
                 </a>
             {% endif %}
@@ -63,5 +70,16 @@
             <li>5번의 기회로 최고 수익률 달성!</li>
         </ol>
     </section>
+    <script>
+    function showLoading() {
+        const messages = [
+            "🏃 창업가가 미팅룸으로 뛰어오는 중...",
+            "💼 창업가가 아이디어 발표준비 중...",
+        ];
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        document.querySelector('.loading-text').textContent = randomMsg;
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    </script>
 </div>
 {% endblock %}

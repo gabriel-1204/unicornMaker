@@ -82,14 +82,6 @@ class GameSession(models.Model):
         """수익률 계산: (현재자본 - 10000) / 10000 * 100"""
         return (self.current_capital - 10000) / 10000 * 100
 
-    # TODO (박기상): 게임 종료 처리 메서드
-    # def finish_game(self):
-    #     self.is_finished = True
-    #     self.final_profit_rate = self.calculate_profit_rate()
-    #     self.save()
-    #     # User의 best_profit_rate, total_games 업데이트
-
-
 # ============================================================
 # Investment 모델 (박기상 담당)
 # ============================================================
@@ -142,10 +134,3 @@ class Investment(models.Model):
     def __str__(self):
         result = "성공" if self.is_success else "실패"
         return f"{self.character_name} - {self.idea_title} ({result})"
-
-    # TODO (박기상): 수익/손실 금액 계산 메서드
-    # def get_profit_amount(self):
-    #     if self.is_success:
-    #         return self.invest_amount * (self.profit_rate / 100)
-    #     else:
-    #         return -self.invest_amount

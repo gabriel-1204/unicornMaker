@@ -6,7 +6,12 @@
 
 {% block content %}
 <div class="result-page {% if investment.is_success %}success{% else %}failure{% endif %}">
-    
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">잠시만 기다려주세요...</p>
+        </div>
+    </div>
     <!-- 결과 헤더 -->
     <div class="result-header">
         <div class="result-character-image">
@@ -35,24 +40,26 @@
     <!-- AI 결과 메시지 -->
     <div class="result-message">
         <div class="system-msg">
-            <span class="tag">[SYSTEM]</span>
+            <span class="tag">SYSTEM</span>
             <p>{{ investment.result_system_msg }}</p>
         </div>
         <div class="character-reaction">
-            <span class="tag">[{{ investment.character_name }}]</span>
+            <span class="tag">{{ investment.character_name }}</span>
             <p>{{ investment.result_character_reaction }}</p>
         </div>
     </div>
 
     <!-- 현재 게임 상태 -->
-    <div class="game-status">
-        <div class="status-item">
-            <span class="label">💰 현재 자본금</span>
-            <span class="value">{{ session.current_capital|korean_currency }}</span>
-        </div>
-        <div class="status-item">
-            <span class="label">🎯 남은 기회</span>
-            <span class="value">{{ session.remaining_chances }}회</span>
+    <div class="result-status">
+        <div class="game-status2">
+            <div class="status-item">
+                <span class="label">💰 현재 자본금</span>
+                <span class="value">{{ session.current_capital|korean_currency }}</span>
+            </div>
+            <div class="status-item">
+                <span class="label">🎯 남은 기회</span>
+                <span class="value">{{ session.remaining_chances }}회</span>
+            </div>
         </div>
     </div>
 
@@ -62,8 +69,21 @@
             <a href="{% url 'game:ranking' %}" class="btn btn-primary">🏆 랭킹 확인</a>
             <a href="{% url 'game:game_start' %}" class="btn btn-secondary">🔄 다시 하기</a>
         {% else %}
-            <a href="{% url 'game:play' session_id=session.pk %}" class="btn btn-primary">다음 투자 →</a>
+            <a href="{% url 'game:play' session_id=session.pk %}" class="btn btn-primary" onclick="showLoading2()">다음 투자 →</a>
         {% endif %}
     </div>
+    <script>
+    function showLoading2() {
+        const messages = [
+        "🏃 다음 창업가가 미팅룸으로 들어오는 중...",
+        "💼 다음 창업가가 아이디어 발표준비 중...",
+        ];
+            
+        // 랜덤 선택
+        const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+        document.querySelector('.loading-text').textContent = randomMsg;
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    </script>
 </div>
 {% endblock %}

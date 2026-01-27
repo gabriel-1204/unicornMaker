@@ -1,0 +1,14 @@
+# 환경 변수
+.env
+
+# Python
+*.pyc
+__pycache__/
+
+# Django
+db.sqlite3
+media/
+
+# IDE
+.vscode/
+.idea/

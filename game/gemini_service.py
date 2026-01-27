@@ -1,8 +1,13 @@
 import random
+import os
 from google import genai
+from dotenv import load_dotenv
 
-# Gemini API 클라이언트
-client = genai.Client(api_key="AIzaSyBsu0qRIGbtWCFXz7gnMIQ2SQRMAjEyrk0")
+# .env 파일 로드
+load_dotenv()
+
+# API 키 가져오기
+client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 MODEL_NAME = "gemini-3-flash-preview"
 
 # ============================================================
@@ -126,7 +131,7 @@ def generate_idea(character):
 3. 질문형 마무리나 "함께 가자"는 식의 권유 멘트는 절대 하지 마.
 
 [출력 태그 가이드]
-[TITLE] 아이디어 제목
+[TITLE] 아이디어 제목 (20자 이내)
 [DESC] 위 규칙대로 작성된 아이디어 제안 본문 (300자 이내)
 '''
 

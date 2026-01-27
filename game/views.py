@@ -101,7 +101,7 @@ def game_start_view(request):
     
     if active_session:
         return redirect('game:play', session_id=active_session.pk)
-    
+
     # 새 게임 세션 생성 (초기자본 1억 = 10000만원, 기회 5회)
     session = GameSession.objects.create(
         user=request.user,
@@ -121,8 +121,8 @@ def play_view(request, session_id):
     if session.is_finished:
         return redirect('game:main')
     
-    # 자본금 부족 체크 (2000만원 미만이면 게임 종료)
-    if session.current_capital < 2000:
+    # 자본금 부족 체크 (0원 이하면 게임 종료)
+    if session.current_capital <= 0:
         session.is_finished = True
         session.final_profit_rate = session.calculate_profit_rate()
         session.save()
@@ -130,6 +130,7 @@ def play_view(request, session_id):
         # 유저 통계 업데이트 (최고 수익률 갱신 등)
         update_user_stats(request.user, session.final_profit_rate)
         
+
         return redirect('game:ranking')
     
     # 1. 랜덤 캐릭터 선택 (get_random_character가 가중치 적용)
@@ -228,6 +229,7 @@ def invest_view(request, session_id):
             session.final_profit_rate = session.calculate_profit_rate()
             session.save()
             update_user_stats(request.user, session.final_profit_rate)
+            
         else:
             session.save()
         
@@ -320,5 +322,5 @@ def update_user_stats(user, profit_rate):
     """유저 통계 업데이트 (게임 종료 시 호출)"""
     user.total_games += 1
     if profit_rate > user.best_profit_rate:
-        user.best_profit_rate = profit_rate
+       user.best_profit_rate = profit_rate
     user.save()
