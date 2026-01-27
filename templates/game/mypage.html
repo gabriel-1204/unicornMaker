@@ -25,7 +25,7 @@
     <!-- 통계 섹션 -->
     <section class="stats-section">
         <div class="stat-item">
-            <span class="stat-value">{{ user.best_profit_rate|floatformat:1 }}%</span>
+            <span class="stat-value" style="color: #55efc4;">{{ user.best_profit_rate|floatformat:1 }}%</span>
             <span class="stat-label">최고 수익률</span>
         </div>
         <div class="stat-item">
@@ -64,7 +64,8 @@
         {% endif %}
     </section>
 
-    <!-- 비밀번호 변경 섹션 (동주 담당) -->
+    <!-- 비밀번호 변경 섹션 (동주 담당) 
+    {% comment "비밀번호 변경 기능 - 나중에 구현" %}
     <section class="password-section glass-card">
         <h2>🔐 비밀번호 변경</h2>
         
@@ -89,6 +90,8 @@
             <button type="submit" class="btn btn-primary">비밀번호 변경</button>
         </form>
     </section>
+    {% endcomment %}
+    -->
 
     <div class="btn-group">
         <a href="{% url 'game:game_start' %}" class="btn btn-primary">🚀 게임 시작</a>

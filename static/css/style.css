@@ -1095,3 +1095,12 @@ a {
     font-size: 20px;
     font-weight: 700;
 }
+
+/* Top3 수익률 색상 */
+.top3-item .profit.positive {
+    color: #55efc4;
+}
+
+.top3-item .profit.negative {
+    color: #ff6b6b;
+}

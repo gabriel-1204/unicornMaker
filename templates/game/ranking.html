@@ -58,7 +58,7 @@
                 <tr>
                     <td class="rank">{{ forloop.counter }}</td>
                     <td class="nickname">{{ session.user.nickname }}</td>
-                    <td class="profit positive">{{ session.final_profit_rate|floatformat:1 }}%</td>
+                    <td class="profit {% if session.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ session.final_profit_rate|floatformat:1 }}%</td>
                     <td class="capital">{{ session.current_capital|korean_currency }}</td>
                     <td class="date">{{ session.created_at|date:"m/d" }}</td>
                 </tr>

@@ -49,7 +49,7 @@
                 <div class="top3-item rank-{{ forloop.counter }}">
                     <span class="rank">{{ forloop.counter }}</span>
                     <span class="nickname">{{ session.user.nickname }}</span>
-                    <span class="profit">{{ session.final_profit_rate|floatformat:1 }}%</span>
+                    <span class="profit {% if session.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ session.final_profit_rate|floatformat:1 }}%</span>
                 </div>
                 {% endfor %}
             </div>
