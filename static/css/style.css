@@ -180,6 +180,11 @@ a {
     color: var(--white);
 }
 
+.btn-danger :hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px #fab1a0;
+}
+
 .btn-link {
     background: none;
     color: var(--white);
@@ -328,12 +333,13 @@ a {
 }
 
 .top3-item {
-    display: flex;
+display: flex;
     align-items: center;
     padding: 16px 24px;
-    background: rgba(255,255,255,0.15);
+    /* background: rgba(255, 255, 255, 0.15); */
     border-radius: 16px;
     transition: all 0.3s ease;
+    flex-direction: column;
 }
 
 .top3-item:hover {
@@ -394,14 +400,10 @@ a {
     text-align: center;
 }
 
-.how-to-play ol {
+.how-to-play p {
     color: var(--white);
     padding-left: 24px;
-}
-
-.how-to-play li {
-    padding: 8px 0;
-    font-size: 16px;
+    
 }
 
 /* ============================================================
@@ -538,8 +540,11 @@ a {
 }
 
 .character-info {
+    display: flex;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    flex-direction: column;
+    justify-content: center;
 }
 
 .character-image {
@@ -1135,4 +1140,41 @@ a {
 
 .top3-item .profit.negative {
     color: #ff6b6b;
+}
+
+/* 확률 단계별 색상 - 우선순위 높임 */
+.status-item .value.prob-worst {
+    color: #e74c3c !important;
+    font-weight: bold;
+}
+
+.status-item .value.prob-low {
+    color: #e67e22 !important;
+    font-weight: bold;
+}
+
+.status-item .value.prob-normal {
+    color: #f1c40f !important;
+    font-weight: bold;
+}
+
+.status-item .value.prob-good {
+    color: #2ecc71 !important;
+    font-weight: bold;
+}
+
+.status-item .value.prob-great {
+    color: #3498db !important;
+    font-weight: bold;
+}
+
+.status-item .value.prob-perfect {
+    color: #9b59b6 !important;
+    font-weight: bold;
+}
+
+/* 비활성화된 강화 버튼 */
+.btn-up:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

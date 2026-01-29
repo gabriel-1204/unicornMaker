@@ -11,6 +11,30 @@ from .gemini_service import generate_idea, generate_result, get_random_character
 
 
 # ============================================================
+# 확률 → 단계 변환 함수
+# ============================================================
+def get_prob_level(prob):
+    """
+    확률(0~1)을 단계 정보로 변환
+    반환: {'text': 표기, 'class': CSS클래스}
+    """
+    percent = prob * 100
+    
+    if percent >= 100:
+        return {'text': '✨확정', 'class': 'prob-perfect'}
+    elif percent >= 81:
+        return {'text': '🤩훌륭', 'class': 'prob-great'}
+    elif percent >= 61:
+        return {'text': '😊좋음', 'class': 'prob-good'}
+    elif percent >= 41:
+        return {'text': '😐보통', 'class': 'prob-normal'}
+    elif percent >= 21:
+        return {'text': '😟낮음', 'class': 'prob-low'}
+    else:
+        return {'text': '😰최악', 'class': 'prob-worst'}
+
+
+# ============================================================
 # 회원 시스템 (유동주 담당)
 # ============================================================
 
@@ -125,22 +149,39 @@ def play_view(request, session_id):
         return redirect('game:ranking')
     
     # ========== 새로고침 방지 ==========
-    # 세션에 저장된 캐릭터/아이디어가 있으면 재사용
     character = request.session.get('current_character')
     idea = request.session.get('current_idea')
     
-    # 없을 때만 새로 생성
     if not character or not idea:
+        # 새 캐릭터/아이디어 생성
         character = get_random_character()
         idea = generate_idea(character)
         request.session['current_character'] = character
         request.session['current_idea'] = idea
-    # ==================================
+        
+        # 기본 확률 설정
+        success_prob = character.get('success_rate', 0.5)
+        request.session['success_prob'] = success_prob
+        request.session['enchant_used'] = False  # 강화 사용 여부 초기화
+    else:
+        # 세션에 저장된 확률 불러오기
+        success_prob = request.session.get('success_prob', 0.5)
     
+    # 확률 단계 계산
+    prob_level = get_prob_level(success_prob)
+    
+    # 강화 가능 여부 (1회 제한 + 2천만원 이상 보유)
+    enchant_used = request.session.get('enchant_used', False)
+    can_enchant = not enchant_used and session.current_capital >= 2000
+
     context = {
         'session': session,
         'character': character,
         'idea': idea,
+        'prob_text': prob_level['text'],
+        'prob_class': prob_level['class'],
+        'can_enchant': can_enchant,
+        'enchant_used': enchant_used,
     }
     return render(request, 'game/play.html', context)
 
@@ -151,73 +192,105 @@ def invest_view(request, session_id):
     session = get_object_or_404(GameSession, pk=session_id, user=request.user)
     
     if request.method == 'POST':
-        try:
-            invest_amount = int(request.POST.get('amount', 0))
-        except ValueError:
-            return redirect('game:play', session_id=session_id)
+        action = request.POST.get('action')
         
-        # 투자금 검증 로직
-        if invest_amount < 2000 and invest_amount != session.current_capital:
-            return redirect('game:play', session_id=session_id)
-        
-        if invest_amount > session.current_capital:
-            return redirect('game:play', session_id=session_id)
-        
-        # 세션에서 저장된 캐릭터/아이디어 불러오기
-        character = request.session.get('current_character', {})
-        idea = request.session.get('current_idea', {})
-        
-        if not character:
-            return redirect('game:play', session_id=session_id)
-        
-        # 캐릭터별 확률 및 수익률 로직
-        success_prob = character.get('success_rate', 0.5)
-        is_success = random.random() < success_prob
-        
-        if is_success:
-            min_roi = character.get('min_roi', 10)
-            max_roi = character.get('max_roi', 50)
-            profit_rate = random.randint(min_roi, max_roi)
-            profit = int(invest_amount * (profit_rate / 100))
-            session.current_capital += profit
-        else:
-            profit_rate = -100
-            session.current_capital -= invest_amount
-        
-        # AI 결과 메시지 생성
-        result = generate_result(character, idea.get('title', '무제'), is_success)
-        
-        # 투자 기록 저장
-        investment = Investment.objects.create(
-            session=session,
-            character_name=character.get('name', '알 수 없음'),
-            idea_title=idea.get('title', '제목 없음'),
-            idea_description=idea.get('description', ''),
-            invest_amount=invest_amount,
-            is_success=is_success,
-            profit_rate=profit_rate,
-            result_system_msg=result.get('system_msg', ''),
-            result_character_reaction=result.get('reaction', '')
-        )
-        
-        # 기회 차감
-        session.remaining_chances -= 1
-        
-        # 게임 종료 조건 체크
-        if session.remaining_chances <= 0 or session.current_capital <= 0:
-            session.is_finished = True
-            session.final_profit_rate = session.calculate_profit_rate()
-            session.save()
-            update_user_stats(request.user, session.final_profit_rate)
-        else:
-            session.save()
-        
-        # 세션 데이터 삭제 (다음 턴에 새 캐릭터 나오게)
-        request.session.pop('current_character', None)
-        request.session.pop('current_idea', None)
+        # ========== 투자 처리 ==========
+        if action == 'invest':
+            try:
+                invest_amount = int(request.POST.get('amount', 0))
+            except ValueError:
+                return redirect('game:play', session_id=session_id)
+            
+            # 투자금 검증
+            if invest_amount < 2000 and invest_amount != session.current_capital:
+                return redirect('game:play', session_id=session_id)
+            
+            if invest_amount > session.current_capital:
+                return redirect('game:play', session_id=session_id)
+            
+            character = request.session.get('current_character', {})
+            idea = request.session.get('current_idea', {})
+            
+            if not character:
+                return redirect('game:play', session_id=session_id)
+            
+            # 세션에서 저장된 확률 불러오기
+            success_prob = request.session.get('success_prob', 0.5)
+            
+            is_success = random.random() < success_prob
+            
+            if is_success:
+                min_roi = character.get('min_roi', 10)
+                max_roi = character.get('max_roi', 50)
+                profit_rate = random.randint(min_roi, max_roi)
+                profit = int(invest_amount * (profit_rate / 100))
+                session.current_capital += profit
+            else:
+                profit_rate = -100
+                session.current_capital -= invest_amount
+            
+            # AI 결과 메시지 생성
+            result = generate_result(character, idea.get('title', '무제'), is_success)
+            
+            # 투자 기록 저장
+            investment = Investment.objects.create(
+                session=session,
+                character_name=character.get('name', '알 수 없음'),
+                idea_title=idea.get('title', '제목 없음'),
+                idea_description=idea.get('description', ''),
+                invest_amount=invest_amount,
+                is_success=is_success,
+                profit_rate=profit_rate,
+                result_system_msg=result.get('system_msg', ''),
+                result_character_reaction=result.get('reaction', '')
+            )
+            
+            # 기회 차감
+            session.remaining_chances -= 1
+            
+            # 게임 종료 조건 체크
+            if session.remaining_chances <= 0 or session.current_capital <= 0:
+                session.is_finished = True
+                session.final_profit_rate = session.calculate_profit_rate()
+                session.save()
+                update_user_stats(request.user, session.final_profit_rate)
+            else:
+                session.save()
+            
+            # 세션 데이터 삭제 (다음 턴에 새 캐릭터)
+            request.session.pop('current_character', None)
+            request.session.pop('current_idea', None)
+            request.session.pop('success_prob', None)
+            request.session.pop('enchant_used', None)
 
-        return redirect('game:result', investment_id=investment.pk)
-    
+            return redirect('game:result', investment_id=investment.pk)
+        
+        # ========== 강화 처리 ==========
+        elif action == 'enchant':
+            enchant_used = request.session.get('enchant_used', False)
+            
+            # 이미 강화했으면 무시
+            if enchant_used:
+                return redirect('game:play', session_id=session_id)
+            
+            # 2천만원 미만이면 무시
+            if session.current_capital < 2000:
+                return redirect('game:play', session_id=session_id)
+            
+            # 2천만원 차감
+            session.current_capital -= 2000
+            session.save()
+            
+            # 확률 10~30% 랜덤 증가
+            prob_add = random.randint(10, 30) / 100  # 0.1 ~ 0.3
+            success_prob = request.session.get('success_prob', 0.5)
+            success_prob = min(1.0, success_prob + prob_add)
+            
+            request.session['success_prob'] = success_prob
+            request.session['enchant_used'] = True  # 강화 사용 완료
+            
+            return redirect('game:play', session_id=session_id)
+
     return redirect('game:play', session_id=session_id)
 
 
@@ -227,6 +300,8 @@ def pass_view(request, session_id):
     # 세션 데이터 삭제 (새 캐릭터 나오게)
     request.session.pop('current_character', None)
     request.session.pop('current_idea', None)
+    request.session.pop('success_prob', None)
+    request.session.pop('enchant_used', None)
     return redirect('game:play', session_id=session_id)
 
 

@@ -1,6 +1,8 @@
 import random
 import os
+
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 # .env 파일 로드
@@ -19,10 +21,10 @@ CHARACTERS = {
         'name': '김잼민',
         'concept': '과학상자 고인물 (초6)',
         # [밸런스 데이터: 하이 리스크 하이 리턴]
-        'spawn_weight': 20,    # 등장 확률 20%
+        'spawn_weight': 25,    # 등장 확률 25%
         'success_rate': 0.10,  # 성공 확률 10% (극악)
-        'min_roi': 500,        # 성공 시 최소 500% 수익
-        'max_roi': 2000,       # 성공 시 최대 2000% 수익
+        'min_roi': 1000,       # 성공 시 최소 1000% 수익
+        'max_roi': 3000,       # 성공 시 최대 3000% 수익
         
         # [persona]: 변하지 않는 캐릭터의 성격과 말투
         'persona': """너는 초등학교 6학년 '김잼민'이야. 
@@ -53,8 +55,8 @@ CHARACTERS = {
         'name': '유능한',
         'concept': '엘리트 냉철한 사업가',
         # [밸런스 데이터: 로우 리스크 로우 리턴]
-        'spawn_weight': 30,    # 등장 확률 30% (자주 등장)
-        'success_rate': 0.90,  # 성공 확률 90% (매우 높음)
+        'spawn_weight': 20,    # 등장 확률 20% 
+        'success_rate': 0.70,  # 성공 확률 70% 
         'min_roi': 10,         # 성공 시 최소 10% 수익
         'max_roi': 50,         # 성공 시 최대 50% 수익
 
@@ -69,7 +71,7 @@ CHARACTERS = {
         'name': '공필태(G.P.T)',
         'concept': 'AI 광신도 개발자',
         # [밸런스 데이터: 도박형]
-        'spawn_weight': 20,    # 등장 확률 20%
+        'spawn_weight': 25,    # 등장 확률 25%
         'success_rate': 0.30,  # 성공 확률 30%
         'min_roi': 100,        # 성공 시 최소 100% 수익
         'max_roi': 500,        # 성공 시 최대 500% 수익
@@ -86,9 +88,9 @@ CHARACTERS = {
         'concept': '소심한 천재 발명가',
         # [밸런스 데이터: 히든 캐릭터 (슈퍼 리턴)]
         'spawn_weight': 5,     # 등장 확률 5% (희귀)
-        'success_rate': 0.95,  # 성공 확률 95%
-        'min_roi': 200,        # 성공 시 최소 200% 수익
-        'max_roi': 2000,        # 성공 시 최대 2000% 수익
+        'success_rate': 0.75,  # 성공 확률 75%
+        'min_roi': 2000,        # 성공 시 최소 2000% 수익
+        'max_roi': 5000,        # 성공 시 최대 5000% 수익
 
         'persona': """너는 20대 발명가 '왕소심'이야. 
 아이디어는 천재적인데 극도로 소심해서 남들 눈을 잘 못 쳐다봐. 
@@ -131,14 +133,19 @@ def generate_idea(character):
 3. 질문형 마무리나 "함께 가자"는 식의 권유 멘트는 절대 하지 마.
 
 [출력 태그 가이드]
-[TITLE] 아이디어 제목 (20자 이내)
-[DESC] 위 규칙대로 작성된 아이디어 제안 본문 (300자 이내)
+[TITLE] 아이디어 제목 (15자 이내)
+[DESC] 위 규칙대로 작성된 아이디어 제안 본문 (250자 미만)
 '''
 
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_level="minimal"),
+                max_output_tokens=300,  # TITLE+DESC 합쳐서 350자 커버
+                temperature=0.8  # 창의성up
+            )
         )
         text = response.text.strip()
         
@@ -201,6 +208,9 @@ def generate_result(character, idea_title, is_success):
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_level="minimal")
+            )
         )
         text = response.text.strip()
         

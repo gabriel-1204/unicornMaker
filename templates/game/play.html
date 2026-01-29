@@ -45,7 +45,7 @@
             </div>
             <div class="status-item">
                 <span class="label">🌞성공 확률</span>
-                <span class="value"> ??? %</span>
+                <span class="value {{ prob_class }}">{{ prob_text }}</span>
             </div>
         </div>
         <form method="POST" action="{% url 'game:invest' session_id=session.pk %}" onsubmit="showLoading()">
@@ -55,35 +55,61 @@
                 <label>투자 금액 (만원)</label>
                 <input type="number" name="amount" 
                        max="{{ session.current_capital }}" 
-                       id = "amount"
-                       value = 2000
+                       id="amount"
+                       value="2000"
                        required>
-                       <!-- min, value 2000 빼고 최솟값 별도 지정 -->
 
-                <!-- <small>최소 2,000만원 이상 투자 가능</small> -->
                 <small>2000만원 이상 혹은 올인만 가능</small>
             </div>            
             <div class="btn-group">
-                <button type="submit" class="btn btn-primary">💸투자하기</button>
-                <button type="submit" class="btn btn-up">⬆️확률강화</button>
+                <button type="submit" class="btn btn-primary" name="action" value="invest" onclick="return handleInvestRange(event)">💸투자하기</button>
+                
+                {% if can_enchant %}
+                <button type="submit" class="btn btn-up" name="action" value="enchant">💡자문하기</button>
+                {% else %}
+                <button type="button" class="btn btn-up" disabled title="{% if enchant_used %}이미 자문함{% else %}자본금 부족{% endif %}">
+                    {% if enchant_used %}✅자문 완료{% else %}💡자문하기{% endif %}
+                </button>
+                {% endif %}
+                
                 <button type="button" class="btn btn-danger" onclick="setAllIn()">🔥올인</button>
                 <a href="{% url 'game:pass' session_id=session.pk %}" class="btn btn-secondary" onclick="showLoading2()">⏭️패스</a>
             </div>
         </form>
         
         <script>
-        // 올인 기능
-        function setAllIn() {
-            const maxCapital = {{ session.current_capital }};
-            document.querySelector('input[name="amount"]').value = maxCapital;
+        // ========== 변수 정의 ==========
+        const amountInput = document.getElementById('amount');
+        const helpText = document.querySelector('.form-group small');
+        const userCapital = {{ session.current_capital }};
+
+        // ========== 투자 범위 체크 ==========
+        function handleInvestRange(event) {
+            const min = Math.min(2000, userCapital);
+            const currentVal = parseInt(amountInput.value) || 0;
+
+            // 최소 투자금 체크 (올인 제외)
+            if (currentVal < 2000 && currentVal !== userCapital) {
+                alert("2000만원 이상 혹은 올인만 가능합니다.");
+                amountInput.value = min;
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
         }
+
+        // ========== 올인 기능 ==========
+        function setAllIn() {
+            amountInput.value = userCapital;
+        }
+
+        // ========== 초기 설정 ==========
+        const minVal = Math.min(2000, userCapital);
+        amountInput.value = minVal;
+        amountInput.min = minVal;
         
-        // 최솟값 설정
-        const minVal = Math.min(2000, {{ session.current_capital }})
-        document.getElementById('amount').value = minVal
-        document.getElementById('amount').min = minVal
-        
-        // 로딩 오버레이 표시
+        // ========== 로딩 오버레이 ==========
         function showLoading() {
             const messages = [
                 "🏃 투자한 회사가 열심히 굴러가는 중...",
@@ -92,8 +118,6 @@
                 "🔨 투자금으로 열심히 일하는 중...",
                 "📈 사업 결과를 기다리는 중..."
             ];
-            
-            // 랜덤 선택
             const randomMsg = messages[Math.floor(Math.random() * messages.length)];
             document.querySelector('.loading-text').textContent = randomMsg;
             document.getElementById('loading-overlay').style.display = 'flex';
@@ -101,11 +125,9 @@
 
         function showLoading2() {
             const messages = [
-            "🏃 다음 창업가가 미팅룸으로 들어오는 중...",
-            "💼 다음 창업가가 아이디어 발표준비 중...",
+                "🏃 다음 창업가가 미팅룸으로 들어오는 중...",
+                "💼 다음 창업가가 아이디어 발표준비 중...",
             ];
-            
-            // 랜덤 선택
             const randomMsg = messages[Math.floor(Math.random() * messages.length)];
             document.querySelector('.loading-text').textContent = randomMsg;
             document.getElementById('loading-overlay').style.display = 'flex';
