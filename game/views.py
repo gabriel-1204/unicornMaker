@@ -191,6 +191,9 @@ def invest_view(request, session_id):
     """투자 처리"""
     session = get_object_or_404(GameSession, pk=session_id, user=request.user)
     
+    if session.is_finished:
+        return redirect('game:main')
+
     if request.method == 'POST':
         action = request.POST.get('action')
         
@@ -281,8 +284,8 @@ def invest_view(request, session_id):
             session.current_capital -= 2000
             session.save()
             
-            # 확률 10~30% 랜덤 증가
-            prob_add = random.randint(10, 30) / 100  # 0.1 ~ 0.3
+            # 확률 10~50% 랜덤 증가
+            prob_add = random.randint(10, 50) / 100  # 0.1 ~ 0.5
             success_prob = request.session.get('success_prob', 0.5)
             success_prob = min(1.0, success_prob + prob_add)
             

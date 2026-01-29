@@ -1,4 +1,5 @@
 {% extends 'game/base.html' %}
+{% load static %}
 {% load number_filters %}
 
 {% block title %}유니콘 메이커 - 대박 아니면 쪽박!{% endblock %}
@@ -41,33 +42,173 @@
     </section>
 
     <!-- 오늘의 Top 3 -->
-    <section class="top3-section">
-        <h2>🏆 오늘의 Top 3</h2>
-        {% if top3 %}
-            <div class="top3-list">
-                {% for session in top3 %}
-                <div class="top3-item rank-{{ forloop.counter }}">
-                    <span class="rank">{{ forloop.counter }}</span>
-                    <span class="nickname">{{ session.user.nickname }}</span>
-                    <span class="profit {% if session.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ session.final_profit_rate|floatformat:1 }}%</span>
-                </div>
-                {% endfor %}
+    <div class="main-grid">
+        <section class="how-to-play">
+            <h2>🎯 게임 방법</h2>
+            <div class="how-to-play2">
+                <p><span class="emoji-number">1️⃣</span>시작 자본금 1억원!<br>5번의 투자 기회!</p>
+                <p><span class="emoji-number">2️⃣</span>창업가마다 다른<br>등장확률 및 수익률!</p> 
+                <p><span class="emoji-number">3️⃣</span>성공 시 최대 5000%<br>초대박 수익!</p>
+                <p><span class="emoji-number">4️⃣</span>실패 시 투자금<br>전액 손실!</p>
+                <p><span class="emoji-number">5️⃣</span>2천만원으로<br>성공확률 UP!</p>
             </div>
-        {% else %}
-            <p>아직 오늘의 기록이 없습니다. 첫 번째 투자를 시작하세요!</p>
-        {% endif %}
-        <a href="{% url 'game:ranking' %}" class="btn btn-link">전체 랭킹 보기 →</a>
-    </section>
+        </section>     
+        <section class="top3-section">
+            <h2>🏆 오늘의 Top 3</h2>
+            {% if top3 %}
+                <div class="top3-list">
+                    {% for session in top3 %}
+                    <div class="top3-item rank-{{ forloop.counter }}">
+                        <span class="rank">{{ forloop.counter }}</span>                    
+                        <div class="profile-image">
+                        {% if user.img_profile %}
+                            <img src="{{ user.img_profile.url }}" alt="프로필 이미지">
+                        {% else %}
+                            <div class="default-avatar">👤</div>
+                        {% endif %}
+                        </div>
+                        <span class="nickname">{{ session.user.nickname }}</span>
+                        <span class="profit {% if session.final_profit_rate >= 0 %}positive{% else %}negative{% endif %}">{{ session.final_profit_rate|floatformat:1 }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>아직 오늘의 기록이 없습니다. 첫 번째 투자를 시작하세요!</p>
+            {% endif %}
+            <a href="{% url 'game:ranking' %}" class="btn btn-link">전체 랭킹 보기 →</a>
+        </section>
+    </div>
+    <!-- 게임 방법, 캐릭터 소개 섹션 -->
+       
+    <section class="intro-characters">
+        <h2>💼 창업가 소개</h2>
+        <div class="character-slider">
+            <button class="slider-btn prev-btn" onclick="changeCharacter(-1)">‹</button>
+            
+            <div class="character-cards">
+                <!-- 김잼민 (jaemin) -->
+                <div class="character-card active">
+                    <div class="character-image">
+                        <img src="{% static 'images/characters/jaemin.png' %}" alt="김잼민">
+                    </div>
+                    <h3 class="character-name">김잼민</h3>
+                    <p class="character-desc">과학상자 고인물<br>"제 아이디어에 투자 안하면 후회할걸요? 야르 ㅋㅋ"</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span class="stat-label">등장확률</span>
+                            <span class="stat-value">★★★☆☆ (25%)</span>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- 게임 설명 -->
-    <section class="how-to-play">
-        <h2>🎯 게임 방법</h2>
-        <p>자본금 1억으로 시작해서 5인의 창업가가 제안하는 사업에 투자하세요.</p>
-        <p>각 창업가마다 등장확률/성공률/수익률이 다르며, 성공하면 최대 5000% 수익!</p> 
-        <p>실패하면 투자금 전액 손실! 5번의 기회로 최고 수익 달성!</p>
-        <p>PS. 2천만원을 들여 자문하고 성공률을 높이세요!</p>
-    </section>
+                <!-- 성수동 (hipster) -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'images/characters/hipster.png' %}" alt="성수동">
+                    </div>
+                    <h3 class="character-name">성수동</h3>
+                    <p class="character-desc">y2k 빈티지 감성 청년<br>"요즘 힙한 사람들은 다 하던데요.. DM 주시면 감사하겠습니다 🙏"</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span class="stat-label">등장확률</span>
+                            <span class="stat-value">★★★☆☆ (25%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 유능한 (elite) -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'images/characters/elite.png' %}" alt="유능한">
+                    </div>
+                    <h3 class="character-name">유능한</h3>
+                    <p class="character-desc">컨설턴트 출신 엘리트 사업가<br>"데이터 기반 분석 결과, ROI는 충분히 검증되었습니다. 이상입니다."</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span class="stat-label">등장확률</span>
+                            <span class="stat-value">★★★☆☆ (20%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 공필태 (ai_fan) -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'images/characters/ai_fan.png' %}" alt="공필태">
+                    </div>
+                    <h3 class="character-name">공필태(G.P.T)</h3>
+                    <p class="character-desc">AI 광신도 개발자<br>"AI가 계산한 성공 확률은 99.9%입니다. GPT의 뜻대로.."</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span class="stat-label">등장확률</span>
+                            <span class="stat-value">★★★☆☆ (25%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 왕소심 (shy) -->
+                <div class="character-card">
+                    <div class="character-image">
+                        <img src="{% static 'images/characters/shy.png' %}" alt="왕소심">
+                    </div>
+                    <h3 class="character-name">왕소심</h3>
+                    <p class="character-desc">소심한 천재 발명가<br>"저.. 그게.. 아이디어는 괜찮은 것 같은데.. 역시 투자는 무리겠죠.."</p>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <span class="stat-label">등장확률</span>
+                            <span class="stat-value">★☆☆☆☆ (5% 희귀!)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="slider-btn next-btn" onclick="changeCharacter(1)">›</button>
+        </div>
+
+        <!-- 인디케이터 -->
+        <div class="slider-dots">
+            <span class="dot active" onclick="goToCharacter(0)"></span>
+            <span class="dot" onclick="goToCharacter(1)"></span>
+            <span class="dot" onclick="goToCharacter(2)"></span>
+            <span class="dot" onclick="goToCharacter(3)"></span>
+            <span class="dot" onclick="goToCharacter(4)"></span>
+        </div>
+    </section>    
+
     <script>
+    let currentCharacter = 0;
+    const totalCharacters = 5;
+
+    function changeCharacter(direction) {
+        const cards = document.querySelectorAll('.character-card');
+        const dots = document.querySelectorAll('.dot');
+        
+        // 현재 카드 비활성화
+        cards[currentCharacter].classList.remove('active');
+        dots[currentCharacter].classList.remove('active');
+        
+        // 다음 인덱스 계산 (순환)
+        currentCharacter = (currentCharacter + direction + totalCharacters) % totalCharacters;
+        
+        // 새 카드 활성화
+        cards[currentCharacter].classList.add('active');
+        dots[currentCharacter].classList.add('active');
+    }
+
+    function goToCharacter(index) {
+        const cards = document.querySelectorAll('.character-card');
+        const dots = document.querySelectorAll('.dot');
+        
+        // 현재 카드 비활성화
+        cards[currentCharacter].classList.remove('active');
+        dots[currentCharacter].classList.remove('active');
+        
+        // 새 카드 활성화
+        currentCharacter = index;
+        cards[currentCharacter].classList.add('active');
+        dots[currentCharacter].classList.add('active');
+    }
+
     function showLoading() {
         const messages = [
             "🏃 창업가가 미팅룸으로 뛰어오는 중...",

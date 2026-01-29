@@ -53,12 +53,14 @@
             
             <div class="form-group">
                 <label>투자 금액 (만원)</label>
-                <input type="number" name="amount" 
-                       max="{{ session.current_capital }}" 
-                       id="amount"
-                       value="2000"
-                       required>
-
+                <input type="number" name="amount" max="{{ session.current_capital }}" id="amount" value="2000" required>
+                <style>
+                input[type="number"]::-webkit-outer-spin-button,
+                input[type="number"]::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                </style>
                 <small>2000만원 이상 혹은 올인만 가능</small>
             </div>            
             <div class="btn-group">
