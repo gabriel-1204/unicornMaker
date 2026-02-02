@@ -74,7 +74,12 @@ class GameSession(models.Model):
         auto_now_add=True,
         verbose_name='생성 시간'
     )
-
+    # <><><><><><><><><><><><><><><> 0130
+    remaining_reroles = models.IntegerField(
+        default=5,
+        verbose_name='남은 패스 횟수'
+    )
+    # <><><><><><><><><><><><><><><> end of 0130
     def __str__(self):
         return f"{self.user.nickname}의 게임 ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
 

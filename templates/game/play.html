@@ -75,7 +75,17 @@
                 {% endif %}
                 
                 <button type="button" class="btn btn-danger" onclick="setAllIn()">🔥올인</button>
-                <a href="{% url 'game:pass' session_id=session.pk %}" class="btn btn-secondary" onclick="showLoading2()">⏭️패스</a>
+                <!-- 0130 -->
+                {% if session.remaining_reroles > 0 %}
+                    <a href="{% url 'game:pass' session_id=session.pk %}" class="btn btn-secondary" onclick="showLoading2()">
+                        ⏭️패스 ({{ session.remaining_reroles }}/5)
+                    </a>
+                {% else %}
+                    <button type="button" class="btn btn-secondary" disabled style="cursor: not-allowed; opacity: 0.6;">
+                        ❌패스 기회 소진 (0/5)
+                    </button>
+                {% endif %}
+                <!-- end of 0130 -->
             </div>
         </form>
         

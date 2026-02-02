@@ -301,12 +301,21 @@ def invest_view(request, session_id):
 def pass_view(request, session_id):
     """패스 - 기회 차감 없이 다음 캐릭터"""
     # 세션 데이터 삭제 (새 캐릭터 나오게)
-    request.session.pop('current_character', None)
-    request.session.pop('current_idea', None)
-    request.session.pop('success_prob', None)
-    request.session.pop('enchant_used', None)
-    return redirect('game:play', session_id=session_id)
-
+    # <><><><><><><><><><><><><><><> 0130
+    session = get_object_or_404(GameSession, pk=session_id, user=request.user)
+    if session.remaining_reroles >0:
+    # <><><><><><><><><><><><><><><> end of 0130
+        session.remaining_reroles -= 1
+        session.save()
+        request.session.pop('current_character', None)
+        request.session.pop('current_idea', None)
+        request.session.pop('success_prob', None)
+        request.session.pop('enchant_used', None)
+        return redirect('game:play', session_id=session_id)
+    # <><><><><><><><><><><><><><><> 0130
+    else:
+        return redirect('game:play', session_id=session_id)
+    # <><><><><><><><><><><><><><><> end of 0130
 
 @login_required
 def result_view(request, investment_id):
