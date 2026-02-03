@@ -5,6 +5,7 @@
 #### venv\Scripts\activate
 
 ### pip install django google-genai pillow
+### pip install python-dotenv
 
 ### python manage.py makemigrations
 ### python manage.py migrate
