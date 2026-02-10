@@ -4,37 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}유니콘 메이커{% endblock %}</title>
+    <title>{% block title %}유니콘 메이커 - AI 투자 시뮬레이션 게임{% endblock %}</title>
+
+    <!-- SEO 메타태그 -->
+    <meta name="description" content="{% block meta_description %}AI가 만든 스타트업에 투자하세요! 5명의 개성 넘치는 창업가와 함께하는 투자 시뮬레이션 게임. 대박 아니면 쪽박, 당신의 선택은?{% endblock %}">
+    <meta name="keywords" content="투자 시뮬레이션, AI 게임, 스타트업 투자, 유니콘 메이커, 투자 게임, 웹게임">
+    <meta name="author" content="알파메일">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{% block canonical %}{% endblock %}">
+
+    <!-- Open Graph (SNS 공유) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}유니콘 메이커 - AI 투자 시뮬레이션 게임{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}AI가 만든 스타트업에 투자하세요! 대박 아니면 쪽박!{% endblock %}">
+    <meta property="og:image" content="{% static 'images/og-thumbnail.png' %}">
+    <meta property="og:locale" content="ko_KR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="유니콘 메이커 - AI 투자 시뮬레이션 게임">
+    <meta name="twitter:description" content="AI가 만든 스타트업에 투자하세요! 대박 아니면 쪽박!">
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
 </head>
 <body>
     <!-- 네비게이션 -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'game:main' %}" class="nav-logo">🦄 유니콘 메이커</a>
-            
+            <a href="{% url 'game:main' %}" class="nav-logo">유니콘 메이커</a>
             <ul class="nav-menu">
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'game:ranking' %}">🏆 랭킹</a></li>
-                    <li><a href="{% url 'game:mypage' %}">👤 {{ user.nickname }}</a></li>
-                    <li><a href="{% url 'game:logout' %}">로그아웃</a></li>
-                {% else %}
-                    <li><a href="{% url 'game:login' %}">로그인</a></li>
-                    <li><a href="{% url 'game:signup' %}">회원가입</a></li>
-                {% endif %}
+                <li><a href="{% url 'game:ranking' %}">랭킹</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- 메인 컨텐츠 -->
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
+    <!-- 페이지 레이아웃 (사이드 광고 포함) -->
+    <div class="page-layout">
+        <!-- 왼쪽 사이드 광고 -->
+        <aside class="ad-sidebar ad-sidebar-left">
+            <div class="ad-unit ad-vertical">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="LEFT_AD_SLOT_ID"
+                     data-ad-format="vertical"
+                     data-full-width-responsive="false"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- 오른쪽 사이드 광고 -->
+        <aside class="ad-sidebar ad-sidebar-right">
+            <div class="ad-unit ad-vertical">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="RIGHT_AD_SLOT_ID"
+                     data-ad-format="vertical"
+                     data-full-width-responsive="false"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 푸터 위 광고 -->
+    <div class="ad-footer-banner">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="FOOTER_AD_SLOT_ID"
+             data-ad-format="horizontal"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <!-- 푸터 -->
     <footer class="footer">
-        <p>© 2026 알파메일 - 유니콘 메이커</p>
+        <p>&copy; 2026 알파메일 - 유니콘 메이커</p>
     </footer>
 </body>
 </html>

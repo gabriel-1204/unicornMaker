@@ -3,16 +3,11 @@ from django.contrib.auth.models import AbstractUser
 
 
 # ============================================================
-# User 모델 (유동주 담당)
+# User 모델 (레거시 - 마이그레이션 호환용으로 유지)
 # ============================================================
 class User(AbstractUser):
-    """
-    커스텀 유저 모델
-    - AbstractUser 상속하여 기본 username, password 등 사용
-    - 추가 필드: nickname, img_profile, best_profit_rate, total_games
-    """
     nickname = models.CharField(
-        max_length=20, 
+        max_length=20,
         unique=True,
         verbose_name='닉네임'
     )
@@ -34,27 +29,31 @@ class User(AbstractUser):
     def __str__(self):
         return self.nickname
 
-    # TODO (유동주): 필요시 추가 메서드 작성
-    # 예: 프로필 이미지 없을 때 기본 이미지 반환
-
 
 # ============================================================
-# GameSession 모델 (박기상 담당)
+# GameSession 모델
 # ============================================================
 class GameSession(models.Model):
     """
     게임 한 판 (세션)
-    - 게임 시작 시 생성, 종료 시 is_finished = True
+    - 닉네임 기반 (로그인 불필요)
     - 자본금 1억(10000만원), 기회 5회로 시작
     """
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='game_sessions',
-        verbose_name='플레이어'
+        verbose_name='플레이어',
+        null=True,
+        blank=True,
+    )
+    nickname = models.CharField(
+        max_length=20,
+        default='익명투자자',
+        verbose_name='닉네임'
     )
     current_capital = models.BigIntegerField(
-        default=10000,  # 만원 단위, 1억 = 10000
+        default=10000,
         verbose_name='현재 자본금(만원)'
     )
     remaining_chances = models.IntegerField(
@@ -74,21 +73,21 @@ class GameSession(models.Model):
         auto_now_add=True,
         verbose_name='생성 시간'
     )
-    # <><><><><><><><><><><><><><><> 0130
     remaining_reroles = models.IntegerField(
         default=5,
         verbose_name='남은 패스 횟수'
     )
-    # <><><><><><><><><><><><><><><> end of 0130
+
     def __str__(self):
-        return f"{self.user.nickname}의 게임 ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
+        return f"{self.nickname}의 게임 ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
 
     def calculate_profit_rate(self):
         """수익률 계산: (현재자본 - 10000) / 10000 * 100"""
         return (self.current_capital - 10000) / 10000 * 100
 
+
 # ============================================================
-# Investment 모델 (박기상 담당)
+# Investment 모델
 # ============================================================
 class Investment(models.Model):
     """

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /game/
+
+Sitemap: https://your-domain.com/sitemap.xml

@@ -105,11 +105,57 @@ a {
 /* ============================================================
    메인 컨텐츠
    ============================================================ */
+/* 페이지 레이아웃 (사이드 광고 포함) */
+.page-layout {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 20px 0;
+    min-height: 100vh;
+}
+
 .main-content {
     max-width: 900px;
-    margin: 0 auto;
-    padding: 100px 20px 40px;
+    width: 100%;
+    padding: 20px 0 40px;
     min-height: 100vh;
+}
+
+/* 사이드 광고 */
+.ad-sidebar {
+    width: 160px;
+    flex-shrink: 0;
+    padding-top: 20px;
+    position: sticky;
+    top: 80px;
+    align-self: flex-start;
+    height: fit-content;
+}
+
+.ad-unit {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 푸터 위 광고 */
+.ad-footer-banner {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
+    min-height: 90px;
+}
+
+.ad-footer-banner .adsbygoogle {
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 /* ============================================================
@@ -1386,6 +1432,84 @@ a {
 }
 
 .emoji-number {
-    font-size: 30px;  /* 또는 원하는 크기 */
+    font-size: 30px;
     display: block;
+}
+
+/* ============================================================
+   닉네임 입력 폼
+   ============================================================ */
+.nickname-form {
+    margin-top: 30px;
+}
+
+.nickname-input-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nickname-input-group input {
+    padding: 14px 24px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: var(--blur);
+    color: var(--white);
+    text-align: center;
+    width: 280px;
+    transition: all 0.3s ease;
+}
+
+.nickname-input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.nickname-input-group input:focus {
+    outline: none;
+    border-color: var(--white);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   반응형: 사이드 광고 숨기기
+   ============================================================ */
+@media (max-width: 1200px) {
+    .ad-sidebar {
+        display: none;
+    }
+
+    .page-layout {
+        padding: 80px 20px 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-layout {
+        padding: 70px 10px 0;
+    }
+
+    .nickname-input-group {
+        flex-direction: column;
+    }
+
+    .nickname-input-group input {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-layout {
+        padding: 60px 8px 0;
+    }
+
+    .ad-footer-banner {
+        padding: 0 8px;
+    }
 }
