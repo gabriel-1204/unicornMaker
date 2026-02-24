@@ -5,12 +5,22 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-# .env 파일 로드
 load_dotenv()
 
-# API 키 가져오기
-client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 MODEL_NAME = "gemini-3-flash-preview"
+
+# 지연 초기화: API 키가 없어도 서버 시작 가능
+_client = None
+
+
+def get_client():
+    global _client
+    if _client is None:
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
+            return None
+        _client = genai.Client(api_key=api_key)
+    return _client
 
 # ============================================================
 # 5인 캐릭터 페르소나 설정 (성격과 규칙 분리 + 밸런스 데이터 추가)
@@ -137,29 +147,34 @@ def generate_idea(character):
 [DESC] 위 규칙대로 작성된 아이디어 제안 본문 (250자 미만)
 '''
 
+    api_client = get_client()
+    if not api_client:
+        return {
+            'title': f"{character['name']}의 비밀 프로젝트",
+            'description': 'AI 서비스가 준비 중입니다. 잠시 후 다시 시도해주세요.'
+        }
+
     try:
-        response = client.models.generate_content(
+        response = api_client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_level="minimal"),
-                max_output_tokens=300,  # TITLE+DESC 합쳐서 350자 커버
-                temperature=0.8  # 창의성부분 (숫자가 낮을수록 창의성 낮음)
+                max_output_tokens=300,
+                temperature=0.8
             )
         )
         text = response.text.strip()
-        
-        # 파싱 로직
+
         title = ''
         description = ''
-        
+
         for line in text.split('\n'):
             if '[TITLE]' in line:
                 title = line.replace('[TITLE]', '').strip()
             elif '[DESC]' in line:
                 description = line.replace('[DESC]', '').strip()
-        
-        # 파싱 실패 시 전체 텍스트를 설명으로 간주 (방어 코드)
+
         if not description and not title:
              description = text
 
@@ -167,7 +182,7 @@ def generate_idea(character):
             'title': title or f"{character['name']}의 비밀 프로젝트",
             'description': description or '아이디어 구상 중입니다...'
         }
-    
+
     except Exception as e:
         print(f"Gemini API Error (Idea): {e}")
         return {
@@ -204,8 +219,21 @@ def generate_result(character, idea_title, is_success):
 [REACTION] 성공/실패한 아이디어와 관련된 캐릭터의 직접적인 반응 대사 (1~2문장)
 '''
 
+    api_client = get_client()
+    if not api_client:
+        if is_success:
+            return {
+                'system_msg': f'{character["name"]}의 사업이 대박났습니다!',
+                'reaction': '와! 진짜 대박이다!'
+            }
+        else:
+            return {
+                'system_msg': f'{character["name"]}의 사업이 망했습니다...',
+                'reaction': '으악... 내 돈...'
+            }
+
     try:
-        response = client.models.generate_content(
+        response = api_client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
             config=types.GenerateContentConfig(
