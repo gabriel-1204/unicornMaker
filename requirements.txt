@@ -3,3 +3,6 @@ google-genai>=1.0
 pillow>=10.0
 python-dotenv>=1.0
 gunicorn>=21.2
+whitenoise>=6.5
+dj-database-url>=2.1
+psycopg2-binary>=2.9
