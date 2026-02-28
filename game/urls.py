@@ -15,4 +15,7 @@ urlpatterns = [
 
     # 랭킹
     path('ranking/', views.ranking_view, name='ranking'),
+
+    # 헬스체크 (슬립 방지)
+    path('health/', views.health_check, name='health_check'),
 ]

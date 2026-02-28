@@ -1,4 +1,5 @@
 import random
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -287,3 +288,10 @@ def get_hall_of_fame():
     return GameSession.objects.filter(
         is_finished=True
     ).order_by('-final_profit_rate')[:10]
+
+
+# ============================================================
+# 헬스체크 (슬립 방지용)
+# ============================================================
+def health_check(request):
+    return JsonResponse({'status': 'ok'})
